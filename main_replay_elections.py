@@ -13,15 +13,22 @@ from party_constants import PartyConstants
 from party_snapshot import PartySnapshot
 from snapshot import Snapshot
 
-REPLAY_ELECTION_PATH = "./testdata/GR2026-03-11.jsonl"
+REPLAY_ELECTION_PATH = "./replay/TK2025-10-29.jsonl"
 
 def main():
-    replay_election_2025 = []
+    replay_previous_election = []
     with open(REPLAY_ELECTION_PATH, "r") as f:
         for line in f:
-            replay_election_2025.append(json.loads(line))
+            replay_previous_election.append(json.loads(line))
 
-    for snapshot_replay in replay_election_2025:
+    file = File("data")
+    while True:
+        file.delete_jsonl()
+        execute_replay(replay_previous_election, file)
+        time.sleep(60)
+
+def execute_replay(replay_previous_election: list, file: File):
+    for snapshot_replay in replay_previous_election:
         snapshot = Snapshot()
         snapshot.timestamp = snapshot_replay["timestamp"]
         for party_name, party_snapshot_replay in snapshot_replay["party_snapshots"].items():
@@ -34,14 +41,13 @@ def main():
         snapshot.predict_votes_and_percentages()
         snapshot_dict = snapshot.to_dict()
 
-        file = File("data")
         file.dump_to_json(snapshot_dict)
         file.dump_to_jsonl(snapshot_dict)
         file.compress_jsonl_to_gz()
         # file.upload_json_to_s3()
         file.upload_gz_to_s3()
 
-        time.sleep(4)
+        time.sleep(10)
 
 if __name__ == "__main__":
     main()

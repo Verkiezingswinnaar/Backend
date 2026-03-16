@@ -53,3 +53,5 @@ class File:
     def upload_gz_to_s3(self) -> None:
         self.upload_to_s3(self.filename_gz)
 
+    def delete_jsonl(self):
+        os.remove(self.filename_jsonl)
