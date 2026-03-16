@@ -3,8 +3,6 @@ Python backend voor [VerkiezingsWinnaar.nl](https://verkiezingswinnaar.nl/).
 Deze pagina focust vooral op technische details.  
 Zie de [Frontend repository](https://github.com/Verkiezingswinnaar/Frontend) voor een algemeen overzicht.
 
----
-
 ## Installatie-instructies
 ### 1. Frontend
 - Clone de Frontend repository: `git clone https://github.com/Verkiezingswinnaar/Frontend.git`
@@ -14,15 +12,12 @@ Zie de [Frontend repository](https://github.com/Verkiezingswinnaar/Frontend) voo
 ### 2. Backend
 - Clone de Backend repository in een aparte folder: `git clone https://github.com/Verkiezingswinnaar/Backend.git`
 - Installeer de ontbrekende Python packages: (requirements.txt volgt later)
-- Start een lokale server (optioneel, voor de Frontend-data): `python -m http.server 63342`
-- Voer het backend script uit: `python main_reply_elections.py`
-
+- Start een lokale server via PowerShell: `python -m http.server 63342`
+- Run `main_reply_elections.py` 
 
 ### 3. API (optioneel)
 Om `main_api.py` te draaien, moeten de variabelen `URL_API` en `URL_API_INDEX` in een `.env` bestand worden gezet.  
 Deze URLs worden niet gedeeld in de repository om een DDOS te voorkomen.
-
----
 
 ## Berekeningen
 
@@ -62,7 +57,7 @@ Vervolgens wordt een zetelverdeling gegenereerd op basis van $\text{TotaalStemme
 
 ### Prognose Tweede Kamerverkiezingen (nieuwe partijen)
 Voor nieuwe partijen kunnen we geen groei ten opzichte van de vorige verkiezing definiëren.  
-Daarom wordt $ \text{TotaalStemmen}_{\text{partij},2026} $ bepaald op basis van een gewogen gemiddelde van de binnengekomen stemmen en de prognose van de exit polls.  
+Daarom wordt $\text{TotaalStemmen}_{\text{partij},2026}$ bepaald op basis van een gewogen gemiddelde van de binnengekomen stemmen en de prognose van de exit polls.  
 
 
 ### Accuraatheid VerkiezingsWinnaar.nl
@@ -72,24 +67,18 @@ Bij de Tweede Kamerverkiezingen van 2025 was de grootste afwijking tussen de pro
 Deze afwijking ontstond voornamelijk doordat tussentijdse resultaten van een gemeente werden meegenomen als definitieve resultaten.  
 Voor de komende Tweede Kamerverkiezing corrigeert VerkiezingsWinnaar.nl hiervoor, waardoor de afwijking kleiner wordt.
 
----
-
 ## Openstaande issues
 Momenteel neemt VerkiezingsWinnaar.nl een resultaat van een gemeente pas mee als dit resultaat definitief is.  
 Hierdoor worden resultaten van grote gemeentes pas laat meegenomen in $\text{GroeiPrognose}_{\text{partij}}$.
 
----
-
 ## High-level overzicht code
 *(Volgt later)*
-
----
 
 ## Verdere plannen
 - Documentatie uitbreiden.  
 - Refactoring main_api.py
 - Replay van de gemeenteraadsverkiezingen van 2026 toevoegen.  
-- Tussentijdse resultaten volledig ondersteunen.  
+- Tussentijdse resultaten van gemeentes volledig ondersteunen.  
 - Zetelschatting maken voor de landelijke verkiezingen, inclusief ondersteuning voor de D’Hondt-restzetelverdeling.  
-  - Als er een grote nieuwe partij is, dan mogelijk ook de exit polls meenemen.  
+  - Als er een grote nieuwe partij is, dan ook de exit polls meenemen.  
 - Support toevoegen voor de Provinciale Staten / Eerste Kamer.
