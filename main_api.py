@@ -44,7 +44,7 @@ def main():
             file.dump_to_jsonl(snapshot_dict)
             file.compress_jsonl_to_gz()
             # file.upload_json_to_s3()
-            # file.upload_gz_to_s3()
+            file.upload_gz_to_s3()
             print("Uploaded results")
 
         time.sleep(60)
@@ -89,7 +89,7 @@ def create_snapshot(pages: dict[Party, Any], municipalities: dict[str, Any]) -> 
         results = party_results["uitslagen"]
         totals = calculate_party_totals(results, municipalities)
 
-        if has_meaningful_input(totals):
+        if has_significant_input(totals):
             snapshot.party_snapshots[party] = PartySnapshot(
                 totals["this_election"],
                 totals["last_election"],
@@ -106,7 +106,7 @@ def calculate_party_totals(results: list[dict], municipalities: dict[str, Any]) 
         "municipalities": 0,
         # At the moment, the below 3 values are only used for testing/development.
         # The plan is to use last_election_corrected and this_election_with_partials for the next release.
-        # Those values should represent the most
+        # Those values represent a good balance between accuracy and completeness
         "last_election_corrected": 0,
         "this_election_with_partials": 0,
         "last_election_with_partials": 0,
@@ -115,13 +115,17 @@ def calculate_party_totals(results: list[dict], municipalities: dict[str, Any]) 
     for result in results:
         votes_this, votes_last = extract_votes(result)
 
-        if not participated_in_both_elections(votes_this, votes_last):
-            continue
-
         municipality = municipalities[result["cbs_code"]]
         status = municipality["status"]
 
+        if (not participated_in_both_elections(votes_this, votes_last) and
+                # In some cases, a municipality still has a "Nulstand" status even though the results from this year have been reported.
+                # In this case, we still skip the municipality, as the various values in 'totals' could get misaligned.
+                status != "Nulstand"):
+            continue
+
         totals["municipalities"] += 1
+
         totals["this_election_with_partials"] += votes_this
         totals["last_election_with_partials"] += votes_last
 
@@ -156,7 +160,7 @@ def turnout_ratio(municipality: dict) -> float:
     return min(partial_turnout_this_election / turnout_last_election, 1)
 
 
-def has_meaningful_input(totals: dict) -> bool:
+def has_significant_input(totals: dict) -> bool:
     return (
         totals["municipalities"] > MINIMUM_NUMBER_OF_MUNICIPALITIES
         and totals["this_election"] > MINIMUM_NUMBER_OF_VOTES
