@@ -54,4 +54,5 @@ class File:
         self.upload_to_s3(self.filename_gz)
 
     def delete_jsonl(self):
-        os.remove(self.filename_jsonl)
+        if os.path.exists(self.filename_jsonl):
+            os.remove(self.filename_jsonl)

@@ -118,10 +118,10 @@ def calculate_party_totals(results: list[dict], municipalities: dict[str, Any]) 
         municipality = municipalities[result["cbs_code"]]
         status = municipality["status"]
 
-        if (not participated_in_both_elections(votes_this, votes_last) and
+        if (not participated_in_both_elections(votes_this, votes_last) or
                 # In some cases, a municipality still has a "Nulstand" status even though the results from this year have been reported.
                 # In this case, we still skip the municipality, as the various values in 'totals' could get misaligned.
-                status != "Nulstand"):
+                status == "Nulstand"):
             continue
 
         totals["municipalities"] += 1
@@ -158,7 +158,6 @@ def turnout_ratio(municipality: dict) -> float:
         return 0
 
     return min(partial_turnout_this_election / turnout_last_election, 1)
-
 
 def has_significant_input(totals: dict) -> bool:
     return (

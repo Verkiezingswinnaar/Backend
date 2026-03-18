@@ -13,7 +13,8 @@ from party_constants import PartyConstants
 from party_snapshot import PartySnapshot
 from snapshot import Snapshot
 
-REPLAY_ELECTION_PATH = "./replay/TK2025-10-29.jsonl"
+#REPLAY_ELECTION_PATH = "./replay/TK2025-10-29.jsonl"
+REPLAY_ELECTION_PATH = "./testdata/GR2026-03-17.jsonl"
 
 def main():
     replay_previous_election = []
@@ -47,7 +48,10 @@ def execute_replay(replay_previous_election: list, file: File):
         # file.upload_json_to_s3()
         file.upload_gz_to_s3()
 
-        time.sleep(10)
+        time.sleep(4)
 
 if __name__ == "__main__":
     main()
+    # file = File("data")
+    # file.compress_jsonl_to_gz()
+    # file.upload_gz_to_s3()
