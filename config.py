@@ -12,9 +12,11 @@ URL_API_INDEX = os.getenv("URL_API_INDEX")
 # we cannot base the prediction for that party on the votes from the last election.
 PARTY_LAST_ELECTION_VOTES_THRESHOLD = 10000
 
-# We only add a party to a snapshot if both the following 2 thresholds have been exceeded:
-MINIMUM_NUMBER_OF_MUNICIPALITIES = 3
-MINIMUM_NUMBER_OF_VOTES = 5000
+# We only add a party to a snapshot if both the following 2 thresholds have been exceeded
+# For now, we set both values to 0 to not lose any data and to show data as early as possible.
+# It might be an option to do the filtering of the first results from the frontend (or manually during the night)
+MINIMUM_NUMBER_OF_MUNICIPALITIES = 0
+MINIMUM_NUMBER_OF_VOTES = 0
 
 
 ### Scraper & Parser config settings. Deprecated since main_api is now the primary approach for obtaining the election results.
