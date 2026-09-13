@@ -97,7 +97,6 @@ class Snapshot:
         self.estimated_total_votes_direct = total_votes_this_election / total_votes_last_election * PartyConstants.votes_last_election_total
         self.estimated_total_votes_ratio = total_votes_this_election / estimated_total_votes
 
-
     def to_dict(self) -> dict:
         party_snapshots = {}
         for party, snapshot in self.party_snapshots.items():
