@@ -4,9 +4,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-### General config settings
-URL_API = os.getenv("URL_API")
-URL_API_INDEX = os.getenv("URL_API_INDEX")
+def get_api_urls(election_id: str) -> tuple[str, str]:
+    """Return the private provider URLs configured for one election."""
+    url_api = os.getenv(f"URL_API_{election_id}")
+    url_api_index = os.getenv(f"URL_API_INDEX_{election_id}")
+    if not url_api or not url_api_index:
+        raise RuntimeError(
+            f"Set URL_API_{election_id} and URL_API_INDEX_{election_id} in .env"
+        )
+    return url_api, url_api_index
 
 # For new parties (and parties with very little votes during the last election)
 # we cannot base the prediction for that party on the votes from the last election.
