@@ -4,6 +4,7 @@ from dataclasses import dataclass
 class PartySnapshot:
     votes_this_election: int
     votes_last_election: int
+    municipalities: int
     votes_last_election_corrected: float
     votes_this_election_with_partials: int
     votes_last_election_with_partials: int
@@ -13,9 +14,11 @@ class PartySnapshot:
 
     def __init__(self, votes_this_election, votes_last_election,
                  votes_last_election_corrected=0.0,
-                 votes_this_election_with_partials=0, votes_last_election_with_partials=0):
+                 votes_this_election_with_partials=0, votes_last_election_with_partials=0,
+                 municipalities=0):
         self.votes_this_election = votes_this_election
         self.votes_last_election = votes_last_election
+        self.municipalities = municipalities
         self.factor = self.votes_this_election / self.votes_last_election if self.votes_last_election else 0
         self.votes_percentage = 0
         self.votes_prediction = 0
@@ -30,6 +33,7 @@ class PartySnapshot:
             "votes_prediction": round(self.votes_prediction),
             "votes_this_election": self.votes_this_election,
             "votes_last_election": self.votes_last_election,
+            "municipalities": self.municipalities,
             "votes_last_election_corrected": round(self.votes_last_election_corrected),
             "votes_this_election_with_partials": self.votes_this_election_with_partials,
             "votes_last_election_with_partials": self.votes_last_election_with_partials,

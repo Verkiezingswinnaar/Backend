@@ -6,18 +6,56 @@ Zie de [Frontend repository](https://github.com/Verkiezingswinnaar/Frontend) voo
 ## Installatie-instructies
 ### 1. Frontend
 - Clone de Frontend repository: `git clone https://github.com/Verkiezingswinnaar/Frontend.git`
-- Open `constants.js` en haal de comment weg bij `export const DATA_URL = "http://localhost:63342/data.jsonl.gz"`
-- Open `index.html` in een webbrowser naar keuze.
+- Stel `VITE_ELECTION_DATA_BASE_URL` in op de openbare R2-bucket-root; lokaal is dat `/election-assets/`.
+- Start de frontend met `pnpm dev`.
 
 ### 2. Backend
 - Clone de Backend repository in een aparte folder: `git clone https://github.com/Verkiezingswinnaar/Backend.git`
-- Installeer de ontbrekende Python packages: (requirements.txt volgt later)
-- Start een lokale server via PowerShell: `python -m http.server 63342`
-- Run `main_reply_elections.py` 
+- Installeer [uv](https://docs.astral.sh/uv/) en voer in de backendmap `uv sync` uit om Python en de dependencies uit `pyproject.toml` te installeren.
+- Start een lokale server via PowerShell: `uv run python -m http.server 63343`
+- Start de API-verwerking met `uv run python main_api.py`.
+
+
+## Verkiezingsbestanden
+
+`active-elections.json` bevat alleen de actieve `current`- en `previous`-ID's.
+De volledige uitslagen staan per verkiezing in `results-{ID}.json`; de live
+feed wordt `data-{current-ID}.jsonl.gz`. Bij een nieuwe verkiezing wijzig je de
+twee ID's en voeg je het resultatenbestand toe. Zet provider-URL's in `.env`
+als `URL_API_{ID}` en `URL_API_INDEX_{ID}`. Naam, label en type (municipal,
+provincial, national of other) staan bij de resultaten.
 
 ### 3. API (optioneel)
-Om `main_api.py` te draaien, moeten de variabelen `URL_API` en `URL_API_INDEX` in een `.env` bestand worden gezet.  
+Om `main_api.py` te draaien, moeten `URL_API_{ID}` en `URL_API_INDEX_{ID}` in `.env` worden gezet, voor de current election ID.
 Deze URLs worden niet gedeeld in de repository om een DDOS te voorkomen.
+
+### 4. Cloudflare R2 (publiceren)
+De Standard-bucket `verkiezingswinnaar` bevat de publieke `active-elections.json`,
+resultatenbestanden en per-verkiezing feeds. De frontend haalt de actieve IDs op
+en leest `data-{current-ID}.jsonl.gz` en `results-{previous-ID}.json` uit R2.
+De backend publiceert bestanden via de upload-Worker in [`upload-worker/`](upload-worker/README.md).
+Configureer dezelfde willekeurige geheime waarde als Worker-secret `FEED_WRITE_TOKEN`
+en als `CLOUDFLARE_R2_WRITE_TOKEN` in `.env`. Dit is geen Cloudflare API-token.
+
+```dotenv
+CLOUDFLARE_R2_UPLOAD_BASE_URL=https://verkiezingswinnaar-r2-upload.verkiezingswinnaar-feed.workers.dev
+CLOUDFLARE_R2_WRITE_TOKEN=...
+RUN_R2_INTEGRATION=1 # alleen wanneer je de live uploadtest bewust draait
+```
+
+De publieke URL is een Cloudflare-managed `r2.dev`-adres. Cloudflare geeft aan dat deze URL bedoeld is voor niet-productieverkeer en variabele rate limits heeft. Voor productie kun je later een eigen domein toevoegen aan Cloudflare en als R2 custom domain koppelen.
+
+De upload-Worker accepteert geauthenticeerde `PUT`-requests voor verkiezingsinstellingen, per-verkiezing resultaten en feeds, en een apart replay-testobject. Cloudflare Workers Free heeft daarnaast een accountbrede limiet van 100.000 Worker-requests per dag. Rechtstreekse frontend-reads uit R2 tellen niet als requests naar deze Worker, maar tellen wel mee voor R2-reads. De R2 Standard-vrije bundel omvat 10 GB-maand opslag, 1 miljoen Class A- en 10 miljoen Class B-operaties per maand; internet-egress is gratis. Zie [R2-public buckets](https://developers.cloudflare.com/r2/buckets/public-buckets/), [R2-prijzen](https://developers.cloudflare.com/r2/pricing/) en [Workers-limieten](https://developers.cloudflare.com/workers/platform/limits/).
+
+`VITE_ELECTION_DATA_BASE_URL` points to the public R2 bucket root; locally it is `/election-assets/`.
+
+### Frontend-test replay
+
+Gebruik `uv run python main_replay_elections_test.py local` om een bestand uit `testdata/` te replayen. Standaard gebruikt het script `GR2026-03-17.jsonl`, schrijft naar `data-TK2025.jsonl.gz` en wacht vier seconden tussen snapshots. Start ook `uv run python -m http.server 63343` vanuit deze map; Vite proxy't instellingen, resultaten en feed.
+
+Voor een R2-test: configureer `CLOUDFLARE_R2_TEST_UPLOAD_URL` met een HTTPS-Worker-URL die eindigt op `/data-test.jsonl.gz` en configureer `CLOUDFLARE_R2_WRITE_TOKEN`. Start daarna `uv run python main_replay_elections_test.py r2`. Deze modus schrijft alleen de aparte testobject-key. Gebruik voor de frontend een testbucket met bijbehorende actieve instellingen en resultaten als `VITE_ELECTION_DATA_BASE_URL`.
+
+Een opt-in integratietest `tests/test_r2_public_feed.py` uploadt de feed van het actieve election ID via de upload-Worker en haalt die op via de openbare R2-URL. Configureer de `CLOUDFLARE_R2_*`-waarden en `RUN_R2_INTEGRATION=1` in `.env` om de test bewust uit te voeren. De test overschrijft de actieve publieke feed.
 
 ## Berekeningen
 
@@ -72,7 +110,16 @@ Momenteel neemt VerkiezingsWinnaar.nl een resultaat van een gemeente pas mee als
 Hierdoor worden resultaten van grote gemeentes pas laat meegenomen in $\text{GroeiPrognose}_{\text{partij}}$.
 
 ## High-level overzicht code
-*(Volgt later)*
+
+- `main_api.py` haalt uitslagen voor partijen en gemeenten op, berekent per partij de totalen en maakt een snapshot. Nieuwe snapshots worden lokaal opgeslagen als JSON/JSONL, gecomprimeerd en naar Cloudflare R2 geüpload.
+- `snapshot.py` berekent prognoses en serialiseert de hoofdstructuur van een snapshot.
+- `party_snapshot.py` bevat de cijfers en serialisatie per partij.
+- `party.py`, `party_constants.py` en `config.py` bevatten partijgegevens, historische stemmen, drempelwaarden en configuratie uit de omgeving.
+- `file.py` verzorgt lokale bestanden, gzip-compressie en Cloudflare R2-upload.
+- `main_replay_elections.py` verwerkt opgeslagen JSONL-resultaten opnieuw. De mappen `replay/` en `testdata/` bevatten respectievelijk bewaarde verkiezingsdata en synthetische ontwikkeldata.
+- `main_api.py` is de huidige route voor het ophalen van uitslagen.
+
+Voor AI-assistenten en bijdragers staan de projectafspraken, rekenregels en veilige ontwikkelworkflow in [`AGENTS.md`](AGENTS.md).
 
 ## Verdere plannen
 - Documentatie uitbreiden.  

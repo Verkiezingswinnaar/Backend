@@ -1,0 +1,12 @@
+{
+  "name": "verkiezingswinnaar-r2-upload",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "node --check src/index.js"
+  },
+  "devDependencies": {
+    "wrangler": "4.142.0"
+  }
+}

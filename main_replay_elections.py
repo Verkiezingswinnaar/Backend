@@ -22,7 +22,7 @@ def main():
         for line in f:
             replay_previous_election.append(json.loads(line))
 
-    file = File("data")
+    file = File(f"data-{PartyConstants.active_elections.current}")
     while True:
         file.delete_jsonl()
         execute_replay(replay_previous_election, file)
@@ -45,8 +45,7 @@ def execute_replay(replay_previous_election: list, file: File):
         file.dump_to_json(snapshot_dict)
         file.dump_to_jsonl(snapshot_dict)
         file.compress_jsonl_to_gz()
-        # file.upload_json_to_s3()
-        file.upload_gz_to_s3()
+        file.upload_gz_to_cloudflare_r2()
 
         time.sleep(4)
 
@@ -54,4 +53,4 @@ if __name__ == "__main__":
     main()
     # file = File("data")
     # file.compress_jsonl_to_gz()
-    # file.upload_gz_to_s3()
+    # file.upload_gz_to_cloudflare_r2()

@@ -1,2 +1,12 @@
 /debugging/
+/replay-output/
+/data-*.jsonl*
+/data.jsonl*
 /.env
+/.venv/
+/.idea/
+/TODO.md
+__pycache__/
+*.py[cod]
+/upload-worker/node_modules/
+/upload-worker/.wrangler/
