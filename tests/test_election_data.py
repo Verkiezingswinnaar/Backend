@@ -23,9 +23,9 @@ class ElectionDataTests(unittest.TestCase):
         self.assertEqual(previous.seats["PVV"], 37)
         self.assertEqual(previous.seats["NSC"], 20)
 
-    def test_replay_party_roster_excludes_overig(self):
+    def test_replay_party_roster_includes_overig(self):
         self.assertIn("OVERIG", PartyConstants.votes_last_election)
-        self.assertNotIn("OVERIG", {party.name for party in PartyConstants.parties})
+        self.assertIn("OVERIG", {party.name for party in PartyConstants.parties})
 
 
 if __name__ == "__main__":
