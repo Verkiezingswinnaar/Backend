@@ -27,8 +27,6 @@ def main():
 
     parties = []
     for party_name in current_results.votes:
-        if party_name == "OVERIG":
-            continue
         previous_votes = previous_results.votes.get(party_name, 0)
         parties.append(Party(
             party_name,
