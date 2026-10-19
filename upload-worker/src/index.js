@@ -17,7 +17,8 @@ export default {
         headers: { Allow: "PUT" },
       });
     }
-    if (request.headers.get("Authorization") !== `Bearer ${env.FEED_WRITE_TOKEN}`) {
+    if (!env.FEED_WRITE_TOKEN
+      || request.headers.get("Authorization") !== `Bearer ${env.FEED_WRITE_TOKEN}`) {
       return new Response("Unauthorized", { status: 401 });
     }
     if (!request.body) {
