@@ -32,27 +32,15 @@ def execute_replay(replay_previous_election: list, file: File):
     for snapshot_replay in replay_previous_election:
         snapshot = Snapshot()
         snapshot.timestamp = snapshot_replay["timestamp"]
-        unmodeled_parties = {}
         for party_name, party_snapshot_replay in snapshot_replay["party_snapshots"].items():
 
             party_snapshot = PartySnapshot(party_snapshot_replay["votes_this_election"],
                                            party_snapshot_replay["votes_last_election"])
             party_object = next((p for p in PartyConstants.parties if p.name == party_name), None)
-            if party_object is None:
-                # OVERIG and parties absent from the previous election have no
-                # forecast model, but their recorded data should remain in the feed.
-                unmodeled_parties[party_name] = party_snapshot_replay
-                continue
             snapshot.party_snapshots[party_object] = party_snapshot
 
-        try:
-            snapshot.predict_votes_and_percentages()
-            snapshot_dict = snapshot.to_dict()
-        except ZeroDivisionError:
-            # Early replay snapshots may not contain usable votes yet.
-            snapshot_dict = snapshot_replay
-        else:
-            snapshot_dict["party_snapshots"].update(unmodeled_parties)
+        snapshot.predict_votes_and_percentages()
+        snapshot_dict = snapshot.to_dict()
 
         file.dump_to_json(snapshot_dict)
         file.dump_to_jsonl(snapshot_dict)
