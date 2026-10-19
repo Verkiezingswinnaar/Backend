@@ -19,6 +19,7 @@ This Python backend reads election result data, estimates vote totals, and publi
 ## Working conventions
 
 - Match the existing Python style and keep changes focused. There is no declared Python version, dependency manifest, formatter, or test suite in the repository; do not invent project-wide tooling or claim checks that were not run.
+- When building lists of objects, use an explicit loop with named intermediate variables, then append each object. Avoid list comprehensions and nested constructor expressions when they make the steps harder to follow.
 - Use descriptive names that reflect the Dutch election domain and the existing JSON/API field names. Explain non-obvious election rules near the calculation they affect.
 - Keep calculations deterministic for a given input. Avoid silently changing rounding, thresholds, municipality inclusion rules, or party identities.
 - Preserve the JSON keys and meanings emitted by `Snapshot.to_dict()` and `PartySnapshot.to_dict()` unless the task explicitly requires a schema change. Treat serialized output as a frontend contract.
