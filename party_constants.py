@@ -10,13 +10,11 @@ class PartyConstants:
     seats_last_election = previous_results.seats
     parties = []
     for party_name, party_votes_last_election in votes_last_election.items():
-        parties.append(
-            Party(
-                party_name,
-                party_votes_last_election,
-                is_above_threshold_last_election=(
-                    party_votes_last_election > PARTY_LAST_ELECTION_VOTES_THRESHOLD
-                ),
-            )
+        is_above_threshold = party_votes_last_election > PARTY_LAST_ELECTION_VOTES_THRESHOLD
+        party = Party(
+            party_name,
+            party_votes_last_election,
+            is_above_threshold_last_election=is_above_threshold,
         )
+        parties.append(party)
     votes_last_election_total = previous_results.total_votes
