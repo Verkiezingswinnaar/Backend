@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose a focused improvement to the backend or election calculations.
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Focus on the user outcome and make election assumptions explicit where they affect the result.
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should a user or maintainer be able to do after this change?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and constraints
+      description: Relevant election rules, input data, API compatibility, or related issues.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Done when
+      description: List observable outcomes that can be reviewed.
+      placeholder: |
+        - [ ] ...
+    validations:
+      required: true

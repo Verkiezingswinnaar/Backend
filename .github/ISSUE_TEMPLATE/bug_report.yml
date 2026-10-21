@@ -1,0 +1,40 @@
+name: Bug report
+description: Report incorrect behavior or an election-data problem.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem so it can be reproduced and checked against the election data rules.
+  - type: input
+    id: election
+    attributes:
+      label: Election or data source
+      description: Election ID, municipality, party, or provider involved, if relevant.
+      placeholder: e.g. TK2025 or municipality CBS code
+    validations:
+      required: false
+  - type: textarea
+    id: observed
+    attributes:
+      label: What happened?
+      description: Include the input or steps that reveal the issue and the result you observed.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: Describe the correct behavior or result.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Done when
+      description: List the observable conditions that will confirm the fix.
+      placeholder: |
+        - [ ] ...
+    validations:
+      required: true
